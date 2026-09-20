@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ticky</title>
+  <style>
+    body { font-family: monospace; font-size: 1.1rem; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; }
+    ul { list-style: none; padding: 0; margin: 0 0 1rem; }
+    li { display: flex; gap: 0.75rem; align-items: baseline; margin: 0.25rem 0; }
+    .item { cursor: pointer; flex: 1; }
+    .item:hover { text-decoration: underline; }
+    .remove, input, button { font-family: inherit; font-size: inherit; }
+    input { width: 20rem; max-width: 60%; }
+  </style>
+</head>
+<body>
+  <ul id="list"></ul>
+  <button id="add">Add</button>
+  <form id="add-form" hidden>
+    <input id="add-text" type="text" placeholder="What needs to be done?" autocomplete="off" required>
+    <button type="submit">Save</button>
+    <button type="button" id="add-cancel">Cancel</button>
+  </form>
+
+  <script>
+    const list = document.getElementById('list');
+
+    function render(items) {
+      list.innerHTML = '';
+      for (const item of items) {
+        const li = document.createElement('li');
+
+        const label = document.createElement('span');
+        label.className = 'item';
+        label.textContent = (item.done ? '+ ' : '- ') + item.text;
+        label.onclick = () => request(`/api/items/${item.id}/toggle`, 'POST');
+
+        const remove = document.createElement('button');
+        remove.className = 'remove';
+        remove.textContent = 'Remove';
+        remove.onclick = () => request(`/api/items/${item.id}`, 'DELETE');
+
+        li.append(label, remove);
+        list.append(li);
+      }
+    }
+
+    async function request(url, method = 'GET', body) {
+      const res = await fetch(url, {
+        method,
+        headers: body ? { 'Content-Type': 'application/json' } : undefined,
+        body: body ? JSON.stringify(body) : undefined,
+      });
+      if (res.ok) render(await res.json());
+    }
+
+    const addButton = document.getElementById('add');
+    const addForm = document.getElementById('add-form');
+    const addText = document.getElementById('add-text');
+
+    function closeForm() {
+      addForm.hidden = true;
+      addButton.hidden = false;
+      addText.value = '';
+    }
+
+    addButton.onclick = () => {
+      addButton.hidden = true;
+      addForm.hidden = false;
+      addText.focus();
+    };
+
+    addForm.onsubmit = (e) => {
+      e.preventDefault();
+      const text = addText.value.trim();
+      if (text) request('/api/items', 'POST', { text });
+      closeForm();
+    };
+
+    document.getElementById('add-cancel').onclick = closeForm;
+
+    request('/api/items');
+  </script>
+</body>
+</html>
