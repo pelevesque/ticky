@@ -4,7 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Ticky</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@600&display=swap" rel="stylesheet">
   <style>
+    h1 { font-family: 'IBM Plex Sans', sans-serif; font-weight: 600; text-align: center; margin: 0 0 2rem; }
     body { font-family: monospace; font-size: 1.1rem; max-width: 40rem; margin: 2rem auto; padding: 0 1rem; }
     ul { list-style: none; padding: 0; margin: 0 0 1rem; }
     li { display: flex; gap: 0.75rem; align-items: baseline; margin: 0.25rem 0; }
@@ -16,6 +20,7 @@
   </style>
 </head>
 <body>
+  <h1>Ticky</h1>
   <ul id="list"></ul>
   <button id="add">Add</button>
   <form id="add-form" hidden>
