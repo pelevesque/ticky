@@ -42,12 +42,12 @@
         const label = document.createElement('span');
         label.className = 'item';
         label.textContent = (item.done ? '+ ' : '- ') + item.text;
-        label.onclick = () => request(`/api/items/${item.id}/toggle`, 'POST');
+        label.onclick = () => request(`api/items/${item.id}/toggle`, 'POST');
 
         const remove = document.createElement('button');
         remove.className = 'remove';
         remove.textContent = 'Remove';
-        remove.onclick = () => request(`/api/items/${item.id}`, 'DELETE');
+        remove.onclick = () => request(`api/items/${item.id}`, 'DELETE');
 
         li.append(label, remove);
         list.append(li);
@@ -82,13 +82,13 @@
     addForm.onsubmit = (e) => {
       e.preventDefault();
       const text = addText.value.trim();
-      if (text) request('/api/items', 'POST', { text });
+      if (text) request('api/items', 'POST', { text });
       closeForm();
     };
 
     document.getElementById('add-cancel').onclick = closeForm;
 
-    request('/api/items');
+    request('api/items');
   </script>
 </body>
 </html>

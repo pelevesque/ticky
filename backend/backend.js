@@ -41,17 +41,29 @@ function readJson(req) {
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, `http://${req.headers.host}`);
 
+  // The app may be mounted under a URL prefix (e.g. /ticky on shared hosting),
+  // so route on whatever follows the first "/api/".
+  const apiAt = url.pathname.indexOf('/api/');
+  const isApi = apiAt !== -1;
+  const pathname = isApi ? url.pathname.slice(apiAt) : url.pathname;
+
   try {
-    if (req.method === 'GET' && url.pathname === '/') {
+    if (req.method === 'GET' && !isApi) {
+      const lastSegment = url.pathname.split('/').pop();
+      if (lastSegment && !lastSegment.includes('.')) {
+        // The page uses relative API URLs, so it must be served from a trailing slash.
+        res.writeHead(301, { Location: url.pathname + '/' + url.search });
+        return res.end();
+      }
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
       return res.end(fs.readFileSync(INDEX_PATH));
     }
 
-    if (req.method === 'GET' && url.pathname === '/api/items') {
+    if (req.method === 'GET' && pathname === '/api/items') {
       return sendJson(res, 200, allItems());
     }
 
-    if (req.method === 'POST' && url.pathname === '/api/items') {
+    if (req.method === 'POST' && pathname === '/api/items') {
       const { text } = await readJson(req);
       if (typeof text !== 'string' || !text.trim()) {
         return sendJson(res, 400, { error: 'text is required' });
@@ -60,7 +72,7 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 201, allItems());
     }
 
-    const match = url.pathname.match(/^\/api\/items\/(\d+)(\/toggle)?$/);
+    const match = pathname.match(/^\/api\/items\/(\d+)(\/toggle)?$/);
     if (match) {
       const id = Number(match[1]);
       if (req.method === 'POST' && match[2]) {
